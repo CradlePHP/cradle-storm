@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit backupGlobals="false"
+     backupStaticAttributes="false"
+     colors="true"
+     convertErrorsToExceptions="true"
+     convertNoticesToExceptions="true"
+     convertWarningsToExceptions="true"
+     processIsolation="false"
+     stopOnFailure="false"
+     syntaxCheck="false"
+     bootstrap="test/bootstrap.php"
+>
+  <testsuites>
+    <testsuite name="Cradle Storm Event Test">
+      <file>test/storm.php</file>
+      <file>test/schema.php</file>
+      <file>test/model.php</file>
+    </testsuite>
+  </testsuites>
+  <filter>
+  <whitelist>
+    <directory suffix=".php">./src</directory>
+    <exclude>
+      <directory>./vendor</directory>
+      <directory>./test</directory>
+    </exclude>
+  </whitelist>
+  </filter>
+</phpunit>
