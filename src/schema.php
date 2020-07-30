@@ -1,7 +1,5 @@
 <?php //-->
 
-use PDO as Resource;
-use Cradle\Storm\SqlFactory;
 use Cradle\Storm\SqlException;
 
 /**
@@ -10,7 +8,7 @@ use Cradle\Storm\SqlException;
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-alter', function($request, $response) {
+$this('event')->on('storm-alter', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -18,34 +16,7 @@ $this->on('storm-alter', function($request, $response) {
   }
 
   //----------------------------//
-  // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
-  //----------------------------//
-  // 2. Get Data
+  // 1. Get Data
   $table = $request->getStage('table');
   $primary = $request->getStage('primary');
   $columns = $request->getStage('columns');
@@ -56,7 +27,7 @@ $this->on('storm-alter', function($request, $response) {
   }
 
   //----------------------------//
-  // 3. Validate Data
+  // 2. Validate Data
   $errors = [];
   //we need at least a table
   if (!trim($table)) {
@@ -82,8 +53,8 @@ $this->on('storm-alter', function($request, $response) {
   }
 
   //----------------------------//
-  // 4. Prepare Data
-  $resource = $request->meta('storm');
+  // 3. Prepare Data
+  $resource = $this('storm');
   //if the table doesnt exist
   if (empty($resource->getTables($table))){
     //return error
@@ -202,7 +173,7 @@ $this->on('storm-alter', function($request, $response) {
   }
 
   //----------------------------//
-  // 5. Process Data
+  // 4. Process Data
   try {
     $resource->query((string) $query);
   } catch (SqlException $e) {
@@ -218,7 +189,7 @@ $this->on('storm-alter', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-create', function($request, $response) {
+$this('event')->on('storm-create', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -226,34 +197,7 @@ $this->on('storm-create', function($request, $response) {
   }
 
   //----------------------------//
-  // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
-  //----------------------------//
-  // 2. Get Data
+  // 1. Get Data
   $table = $request->getStage('table');
   $primary = $request->getStage('primary');
   $columns = $request->getStage('columns');
@@ -264,7 +208,7 @@ $this->on('storm-create', function($request, $response) {
   }
 
   //----------------------------//
-  // 3. Validate Data
+  // 2. Validate Data
   $errors = [];
   //we need at least a table
   if (!trim($table)) {
@@ -290,8 +234,8 @@ $this->on('storm-create', function($request, $response) {
   }
 
   //----------------------------//
-  // 4. Prepare Data
-  $resource = $request->meta('storm');
+  // 3. Prepare Data
+  $resource = $this('storm');
 
   //determine the create schema
   $query = $resource->getCreateQuery($table);
@@ -348,9 +292,9 @@ $this->on('storm-create', function($request, $response) {
   }
 
   //----------------------------//
-  // 5. Process Data
+  // 4. Process Data
   if ($request->getStage('drop')) {
-    $this->trigger('storm-drop', $request, $response);
+    $this('event')->emit('storm-drop', $request, $response);
     if ($response->isError()) {
       return;
     }
@@ -373,7 +317,7 @@ $this->on('storm-create', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-drop', function($request, $response) {
+$this('event')->on('storm-drop', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -381,38 +325,11 @@ $this->on('storm-drop', function($request, $response) {
   }
 
   //----------------------------//
-  // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
-  //----------------------------//
-  // 2. Get Data
+  // 1. Get Data
   $table = $request->getStage('table');
 
   //----------------------------//
-  // 3. Validate Data
+  // 2. Validate Data
   $errors = [];
   //we need at least a table
   if (!trim($table)) {
@@ -426,12 +343,12 @@ $this->on('storm-drop', function($request, $response) {
   }
 
   //----------------------------//
-  // 4. Prepare Data
-  $resource = $request->meta('storm');
+  // 3. Prepare Data
+  $resource = $this('storm');
   $query = 'DROP TABLE IF EXISTS ' . $table . ';';
 
   //----------------------------//
-  // 5. Process Data
+  // 4. Process Data
   try {
     $resource->query($query);
   } catch (SqlException $e) {
@@ -447,7 +364,7 @@ $this->on('storm-drop', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-rename', function($request, $response) {
+$this('event')->on('storm-rename', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -455,39 +372,12 @@ $this->on('storm-rename', function($request, $response) {
   }
 
   //----------------------------//
-  // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
-  //----------------------------//
-  // 2. Get Data
+  // 1. Get Data
   $table = $request->getStage('table');
   $name = $request->getStage('name');
 
   //----------------------------//
-  // 3. Validate Data
+  // 2. Validate Data
   $errors = [];
   //we need at least a table
   if (!trim($table)) {
@@ -505,12 +395,12 @@ $this->on('storm-rename', function($request, $response) {
   }
 
   //----------------------------//
-  // 4. Prepare Data
-  $resource = $request->meta('storm');
+  // 3. Prepare Data
+  $resource = $this('storm');
   $query = 'RENAME TABLE ' . $table . ' TO ' . $name . ';';
 
   //----------------------------//
-  // 5. Process Data
+  // 4. Process Data
   try {
     $resource->query($query);
   } catch (SqlException $e) {

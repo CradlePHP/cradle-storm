@@ -1,0 +1,32 @@
+{
+  "name": "cradlephp/cradle-storm",
+  "type": "cradle-package",
+  "description": "Storm Integration to Cradle",
+  "minimum-stability": "dev",
+  "keywords": [
+    "orm",
+    "cradle",
+    "cradlephp"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Christian Blanquera",
+      "email": "cblanquera@openovate.com"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "7.0.2",
+    "squizlabs/php_codesniffer": "3.2.3",
+    "php-coveralls/php-coveralls": "~2.1.0"
+  },
+  "require": {
+    "cradlephp/storm": "~3.0.0",
+    "cradlephp/package": "~3.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cradle\\Package\\Storm\\": "src/"
+    }
+  }
+}

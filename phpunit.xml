@@ -13,9 +13,8 @@
 >
   <testsuites>
     <testsuite name="Cradle Storm Event Test">
-      <file>test/storm.php</file>
       <file>test/schema.php</file>
-      <file>test/model.php</file>
+      <file>test/table.php</file>
     </testsuite>
   </testsuites>
   <filter>

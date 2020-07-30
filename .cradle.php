@@ -5,9 +5,27 @@
  * Copyright and license information can be found at LICENSE.txt
  * distributed with this package.
  */
-require_once __DIR__ . '/src/storm/schema.php';
-require_once __DIR__ . '/src/storm/table.php';
-require_once __DIR__ . '/src/system/schema.php';
-require_once __DIR__ . '/src/system/model.php';
 
-require_once __DIR__ . '/src/methods.php';
+use Cradle\Storm\SqlFactory;
+
+//only load if there is a pdo package
+if ($this->isPackage('pdo')) {
+  $this
+    //first register the package storm
+    ->register('storm')
+    //then load the package
+    ->package('storm')
+    //here we use SqlFactory to determine the right engine (mysql, sqlite, postgre)
+    ->mapPackageMethods($this('resolver')->resolveStatic(
+      SqlFactory::class,
+      'load',
+      //this should be the expected PDO object
+      $this('pdo')->getPackageMap()
+    ))
+    //use one global resolver
+    ->setResolverHandler($this('resolver')->getResolverHandler());
+
+  //now we can require the events
+  require_once __DIR__ . '/src/schema.php';
+  require_once __DIR__ . '/src/table.php';
+}

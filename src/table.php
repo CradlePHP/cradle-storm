@@ -1,15 +1,12 @@
 <?php //-->
 
-use PDO as Resource;
-use Cradle\Storm\SqlFactory;
-
 /**
  * Database insert Job
  *
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-insert', function($request, $response) {
+$this('event')->on('storm-insert', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -18,34 +15,9 @@ $this->on('storm-insert', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
   if (!$request->meta('storm-insert')) {
     //make the resource
-    $request->meta('storm-insert', $request->meta('storm')->insert());
+    $request->meta('storm-insert', $this('storm')->insert());
   }
 
   //----------------------------//
@@ -101,7 +73,7 @@ $this->on('storm-insert', function($request, $response) {
   // 5. Process Data
   foreach ($rows as $index => $row) {
     //remove columns that are not in this table
-    $row = $request->meta('storm')->getValidData($table, $row);
+    $row = $this('storm')->getValidData($table, $row);
     //loop through each key
     foreach ($row as $key => $value) {
       if (is_scalar($value)) {
@@ -123,7 +95,7 @@ $this->on('storm-insert', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-delete', function($request, $response) {
+$this('event')->on('storm-delete', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -132,34 +104,9 @@ $this->on('storm-delete', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
   if (!$request->meta('storm-remove')) {
     //make the resource
-    $request->meta('storm-remove', $request->meta('storm')->remove());
+    $request->meta('storm-remove', $this('storm')->remove());
   }
 
   //----------------------------//
@@ -239,7 +186,7 @@ $this->on('storm-delete', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-search', function($request, $response) {
+$this('event')->on('storm-search', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -248,34 +195,9 @@ $this->on('storm-search', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
   if (!$request->meta('storm-search')) {
     //make the resource
-    $request->meta('storm-search', $request->meta('storm')->search());
+    $request->meta('storm-search', $this('storm')->search());
   }
 
   //----------------------------//
@@ -416,7 +338,7 @@ $this->on('storm-search', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this->on('storm-update', function($request, $response) {
+$this('event')->on('storm-update', function($request, $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -425,34 +347,9 @@ $this->on('storm-update', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('mysql')) {
-    //get the name
-    $dbname = $request->getStage('dbname');
-    if (!$dbname) {
-      $dbname = 'main';
-    }
-
-    //get the config
-    $config = $this->package('global')->config('services', 'mysql-' . $dbname);
-
-    //if no config
-    if (!$config || !isset($config['active']) || !$config['active']) {
-      //do nothing as a fallback
-      return;
-    }
-
-    //make the resource
-    $request->meta('mysql', new Resource($config));
-  }
-
-  if (!$request->meta('storm')) {
-    //make the resource
-    $request->meta('storm', SqlFactory::load($request->meta('mysql')));
-  }
-
   if (!$request->meta('storm-update')) {
     //make the resource
-    $request->meta('storm-update', $request->meta('storm')->update());
+    $request->meta('storm-update', $this('storm')->update());
   }
 
   //----------------------------//
@@ -538,7 +435,7 @@ $this->on('storm-update', function($request, $response) {
   }
 
   //remove columns that are not in this table
-  $data = $request->meta('storm')->getValidData($table, $data);
+  $data = $this('storm')->getValidData($table, $data);
   //loop through each key
   foreach ($data as $key => $value) {
     if (is_scalar($value)) {
