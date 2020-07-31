@@ -2,13 +2,16 @@
 
 use Cradle\Storm\SqlException;
 
+use Cradle\IO\Request\RequestInterface;
+use Cradle\IO\Response\ResponseInterface;
+
 /**
  * Database alter job
  *
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-alter', function($request, $response) {
+$this('event')->on('storm-alter', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -189,7 +192,7 @@ $this('event')->on('storm-alter', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-create', function($request, $response) {
+$this('event')->on('storm-create', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -207,6 +210,11 @@ $this('event')->on('storm-create', function($request, $response) {
     $primary = [$primary];
   }
 
+  //make sure columns is an array
+  if (!is_array($columns)) {
+    $columns = [];
+  }
+
   //----------------------------//
   // 2. Validate Data
   $errors = [];
@@ -215,7 +223,7 @@ $this('event')->on('storm-create', function($request, $response) {
     $errors['table'] = 'Table is required';
   }
 
-  if (empty($columns)) {
+  if (empty($columns) && empty($primary)) {
     $errors['columns'] = 'Empty columns';
   } else {
     //all columns should be an array (hash)
@@ -317,7 +325,7 @@ $this('event')->on('storm-create', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-drop', function($request, $response) {
+$this('event')->on('storm-drop', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -364,7 +372,7 @@ $this('event')->on('storm-drop', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-rename', function($request, $response) {
+$this('event')->on('storm-rename', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {

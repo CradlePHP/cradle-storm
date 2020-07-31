@@ -26,6 +26,9 @@ if ($this->isPackage('pdo')) {
     ->setResolverHandler($this('resolver')->getResolverHandler());
 
   //now we can require the events
-  require_once __DIR__ . '/src/schema.php';
-  require_once __DIR__ . '/src/table.php';
+  require_once __DIR__ . '/src/storm/schema.php';
+  require_once __DIR__ . '/src/storm/table.php';
+  require_once __DIR__ . '/src/system/schema.php';
+  require_once __DIR__ . '/src/system/table.php';
+  require_once __DIR__ . '/src/methods.php';
 }

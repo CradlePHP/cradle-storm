@@ -1,12 +1,15 @@
 <?php //-->
 
+use Cradle\IO\Request\RequestInterface;
+use Cradle\IO\Response\ResponseInterface;
+
 /**
  * Database insert Job
  *
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-insert', function($request, $response) {
+$this('event')->on('storm-insert', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -15,9 +18,9 @@ $this('event')->on('storm-insert', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('storm-insert')) {
+  if (!$request->stormInsert) {
     //make the resource
-    $request->meta('storm-insert', $this('storm')->insert());
+    $request->stormInsert = $this('storm')->insert();
   }
 
   //----------------------------//
@@ -67,7 +70,7 @@ $this('event')->on('storm-insert', function($request, $response) {
 
   //----------------------------//
   // 4. Prepare Data
-  $resource = $request->meta('storm-insert')->setTable($table);
+  $resource = $request->stormInsert->setTable($table);
 
   //----------------------------//
   // 5. Process Data
@@ -95,7 +98,7 @@ $this('event')->on('storm-insert', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-delete', function($request, $response) {
+$this('event')->on('storm-delete', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -104,9 +107,9 @@ $this('event')->on('storm-delete', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('storm-remove')) {
+  if (!$request->stormRemove) {
     //make the resource
-    $request->meta('storm-remove', $this('storm')->remove());
+    $request->stormRemove = $this('storm')->remove();
   }
 
   //----------------------------//
@@ -141,7 +144,7 @@ $this('event')->on('storm-delete', function($request, $response) {
 
   //----------------------------//
   // 3. Prepare Data
-  $resource = $request->meta('storm-remove')->setTable($table);
+  $resource = $request->stormRemove->setTable($table);
 
   $validJoinTypes = ['inner', 'left', 'right', 'outer'];
   foreach($joins as $join) {
@@ -186,7 +189,7 @@ $this('event')->on('storm-delete', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-search', function($request, $response) {
+$this('event')->on('storm-search', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -195,9 +198,9 @@ $this('event')->on('storm-search', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('storm-search')) {
+  if (!$request->stormSearch) {
     //make the resource
-    $request->meta('storm-search', $this('storm')->search());
+    $request->stormSearch = $this('storm')->search();
   }
 
   //----------------------------//
@@ -255,10 +258,7 @@ $this('event')->on('storm-search', function($request, $response) {
 
   //----------------------------//
   // 4. Prepare Data
-  $resource = $request
-    ->meta('storm-search')
-    ->setColumns($columns)
-    ->setTable($table);
+  $resource = $request->stormSearch->setColumns($columns)->setTable($table);
 
   $resource->from($table);
 
@@ -338,7 +338,7 @@ $this('event')->on('storm-search', function($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$this('event')->on('storm-update', function($request, $response) {
+$this('event')->on('storm-update', function (RequestInterface $request, ResponseInterface $response) {
   //----------------------------//
   // 0. Abort on Errors
   if ($response->isError() || $response->hasResults()) {
@@ -347,9 +347,9 @@ $this('event')->on('storm-update', function($request, $response) {
 
   //----------------------------//
   // 1. Set the Resources
-  if (!$request->meta('storm-update')) {
+  if (!$request->stormUpdate) {
     //make the resource
-    $request->meta('storm-update', $this('storm')->update());
+    $request->stormUpdate = $this('storm')->update();
   }
 
   //----------------------------//
@@ -401,7 +401,7 @@ $this('event')->on('storm-update', function($request, $response) {
 
   //----------------------------//
   // 4. Prepare Data
-  $resource = $request->meta('storm-update')->setTable($table);
+  $resource = $request->stormUpdate->setTable($table);
 
   $validJoinTypes = ['inner', 'left', 'right', 'outer'];
   foreach($joins as $join) {

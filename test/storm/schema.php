@@ -19,13 +19,17 @@ class Cradle_System_Storm_Event_Schema_Test extends TestCase
   {
     //this is the OOP version of cradle
     $this->object = new PackageHandler;
+    $testRoot = dirname(__DIR__);
+    $packageRoot = dirname($testRoot);
+
     //create a PDO package like the README describes
     $this->object
       ->register('pdo')
       ->package('pdo')
-      ->mapPackageMethods(include __DIR__.'/assets/mysql.php');
+      ->mapPackageMethods(include $testRoot . '/assets/mysql.php');
+
     //now register storm
-    $this->object->register('cradlephp/storm', dirname(__DIR__));
+    $this->object->register('cradlephp/cradle-storm', $packageRoot);
   }
 
   /**
