@@ -60,8 +60,8 @@ $this('event')->on('storm-alter', function (RequestInterface $request, ResponseI
   $resource = $this('storm');
   //if the table doesnt exist
   if (empty($resource->getTables($table))){
-    //return error
-    return $response->setError(true, 'Table does not exist');
+    //create it instead
+    return $this('event')->emit('storm-create', $request, $response);
   }
 
   //we need the original schema to compare
@@ -259,7 +259,7 @@ $this('event')->on('storm-create', function (RequestInterface $request, Response
         'type' => 'int(10)',
         'null' => false,
         'attribute' => 'UNSIGNED',
-        'auto_increment' => true,
+        'auto_increment' => count($primary) === 1,
       ]);
   }
 
@@ -286,15 +286,27 @@ $this('event')->on('storm-create', function (RequestInterface $request, Response
 
     $query->addField($name, $attributes);
 
-    if (isset($column['index']) && $column['index']) {
+    if (isset($column['index'])
+      && $column['index']
+      && $attributes['type'] !== 'TEXT'
+      && $attributes['type'] !== 'BLOB'
+    ) {
       $query->addKey($name, [$name]);
     }
 
-    if (isset($column['unique']) && $column['unique']) {
+    if (isset($column['unique'])
+        && $column['unique']
+        && $attributes['type'] !== 'TEXT'
+        && $attributes['type'] !== 'BLOB'
+    ) {
       $query->addUniqueKey($name, [$name]);
     }
 
-    if (isset($column['primary']) && $column['primary']) {
+    if (isset($column['primary'])
+      && $column['primary']
+      && $attributes['type'] !== 'TEXT'
+      && $attributes['type'] !== 'BLOB'
+    ) {
       $query->addPrimaryKey($name);
     }
   }

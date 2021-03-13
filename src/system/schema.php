@@ -48,9 +48,7 @@ $this('event')->on('system-store-alter', function (RequestInterface $request, Re
 
   //if there are errors
   if (!empty($errors)) {
-    return $response
-      ->setError(true, 'Invalid Parameters')
-      ->set('json', 'validation', $errors);
+    return $response->setValidation($errors);
   }
 
   //----------------------------//
@@ -60,7 +58,7 @@ $this('event')->on('system-store-alter', function (RequestInterface $request, Re
 
   //the goal is to populate columns
   $columns = [];
-  foreach ($data['fields'] as $field) {
+  foreach ($data['fields'] as $name => $field) {
     //if no types
     if (!isset($field['types'])) {
       //let's not add it.. (We are not rocket scientists.)
@@ -86,8 +84,6 @@ $this('event')->on('system-store-alter', function (RequestInterface $request, Re
 
   //----------------------------//
   // 4. Process Data
-  //load the emitter
-  $emitter = $this('event');
   //make a new payload
   $payload = $request->clone(true);
 
@@ -97,13 +93,13 @@ $this('event')->on('system-store-alter', function (RequestInterface $request, Re
     'columns' => $columns
   ]);
 
-  $emitter->emit('storm-alter', $payload, $response);
+  $this('event')->emit('storm-alter', $payload, $response);
 
   if ($response->isError()) {
     return;
   }
 
-  $installed = array_keys($request->getStage('original', 'relations'));
+  $installed = $this('storm')->getTables($data['name'] . '_%');
   $relations = array_keys($data['relations']);
 
   //determine the relation tables that need to be removed
@@ -117,7 +113,8 @@ $this('event')->on('system-store-alter', function (RequestInterface $request, Re
     $payload = $request->clone(true);
     //drop the relation table
     $payload->setStage('table', $relation);
-    $emitter->emit('storm-drop', $payload, $response);
+    //surpress errors
+    $this('event')->method('storm-drop', $payload);
   }
 
   //determine the relation tables that need to be added
@@ -139,7 +136,7 @@ $this('event')->on('system-store-alter', function (RequestInterface $request, Re
     ]);
 
     //surpress errors
-    $this->method('storm-create', $payload);
+    $this('event')->method('storm-create', $payload);
   }
 });
 
@@ -188,9 +185,7 @@ $this('event')->on('system-store-create', function (RequestInterface $request, R
 
   //if there are errors
   if (!empty($errors)) {
-    return $response
-      ->setError(true, 'Invalid Parameters')
-      ->set('json', 'validation', $errors);
+    return $response->setValidation($errors);
   }
 
   //----------------------------//
@@ -200,7 +195,7 @@ $this('event')->on('system-store-create', function (RequestInterface $request, R
 
   //the goal is to populate columns
   $columns = [];
-  foreach ($data['fields'] as $field) {
+  foreach ($data['fields'] as $name => $field) {
     //if no types
     if (!isset($field['types'])) {
       //let's not add it.. (We are not rocket scientists.)
@@ -226,8 +221,6 @@ $this('event')->on('system-store-create', function (RequestInterface $request, R
 
   //----------------------------//
   // 4. Process Data
-  //load the emitter
-  $emitter = $this('event');
   //make a new payload
   $payload = $request->clone(true);
 
@@ -237,7 +230,7 @@ $this('event')->on('system-store-create', function (RequestInterface $request, R
     'columns' => $columns
   ]);
 
-  $emitter->emit('storm-create', $payload, $response);
+  $this('event')->emit('storm-create', $payload, $response);
 
   if ($response->isError()) {
     return;
@@ -257,7 +250,7 @@ $this('event')->on('system-store-create', function (RequestInterface $request, R
     ]);
 
     //surpress errors
-    $this->method('storm-create', $payload);
+    $this('event')->method('storm-create', $payload);
   }
 });
 
@@ -295,14 +288,10 @@ $this('event')->on('system-store-drop', function (RequestInterface $request, Res
 
   //if there are errors
   if (!empty($errors)) {
-    return $response
-      ->setError(true, 'Invalid Parameters')
-      ->set('json', 'validation', $errors);
+    return $response->setValidation($errors);
   }
   //----------------------------//
   // 3. Prepare Data
-  //load the emitter
-  $emitter = $this('event');
   //make a new payload
   $payload = $request->clone(true);
   //set the payload
@@ -314,10 +303,10 @@ $this('event')->on('system-store-drop', function (RequestInterface $request, Res
   if ($data['restorable']) {
     //just rename it
     $payload->setStage('name', '_' . $data['schema']);
-    return $emitter->emit('storm-rename', $payload, $response);
+    return $this('event')->emit('storm-rename', $payload, $response);
   }
 
-  $emitter->emit('storm-drop', $payload, $response);
+  $this('event')->emit('storm-drop', $payload, $response);
 });
 
 /**
@@ -350,14 +339,10 @@ $this('event')->on('system-store-recover', function (RequestInterface $request, 
 
   //if there are errors
   if (!empty($errors)) {
-    return $response
-      ->setError(true, 'Invalid Parameters')
-      ->set('json', 'validation', $errors);
+    return $response->setValidation($errors);
   }
   //----------------------------//
   // 3. Prepare Data
-  //load the emitter
-  $emitter = $this('event');
   //make a new payload
   $payload = $request->clone(true);
   //set the payload
@@ -369,5 +354,5 @@ $this('event')->on('system-store-recover', function (RequestInterface $request, 
   //----------------------------//
   // 4. Process Data
   //just rename it
-  return $emitter->emit('storm-rename', $payload, $response);
+  return $this('event')->emit('storm-rename', $payload, $response);
 });
